@@ -1,8 +1,11 @@
 export class HUD {
-  private worldName:    HTMLElement;
-  private fadeOverlay:  HTMLElement;
-  private loadScreen:   HTMLElement;
-  private controls:     HTMLElement;
+  private worldName:   HTMLElement;
+  private fadeOverlay: HTMLElement;
+  private loadScreen:  HTMLElement;
+  private controls:    HTMLElement;
+  private homeBtn:     HTMLElement;
+  private elements:    HTMLElement[] = [];
+  private onHomeCb?:   () => void;
 
   constructor() {
     this.fadeOverlay = this._el({
@@ -17,6 +20,22 @@ export class HUD {
       letterSpacing: "0.08em", textShadow: "0 0 8px rgba(0,0,0,0.9)",
       pointerEvents: "none", zIndex: "100",
     });
+
+    this.homeBtn = this._el({
+      position: "fixed", top: "46px", left: "20px",
+      color: "rgba(255,255,255,0.25)", font: "11px Georgia, serif",
+      letterSpacing: "0.1em", textShadow: "0 0 8px rgba(0,0,0,0.9)",
+      cursor: "pointer", zIndex: "100",
+      transition: "color 0.2s",
+    });
+    this.homeBtn.textContent = "← Home";
+    this.homeBtn.addEventListener("mouseenter", () => {
+      (this.homeBtn.style as any).color = "rgba(255,255,255,0.6)";
+    });
+    this.homeBtn.addEventListener("mouseleave", () => {
+      (this.homeBtn.style as any).color = "rgba(255,255,255,0.25)";
+    });
+    this.homeBtn.addEventListener("click", () => this.onHomeCb?.());
 
     this.loadScreen = this._el({
       position: "fixed", inset: "0", background: "rgba(0,0,0,0.92)",
@@ -45,7 +64,15 @@ export class HUD {
     const el = document.createElement("div");
     Object.assign(el.style, styles);
     document.body.appendChild(el);
+    this.elements.push(el);
     return el;
+  }
+
+  onHome(cb: () => void): void { this.onHomeCb = cb; }
+
+  dispose(): void {
+    this.elements.forEach((el) => el.remove());
+    this.elements = [];
   }
 
   setWorldName(name: string): void { this.worldName.textContent = name; }

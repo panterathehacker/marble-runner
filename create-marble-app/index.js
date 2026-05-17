@@ -10,7 +10,7 @@ import path from "path";
 import { execSync } from "child_process";
 import { createInterface } from "readline";
 
-const TEMPLATE_DIR = path.join(import.meta.dirname, "..", "template");
+const TEMPLATE_DIR = path.join(import.meta.dirname, "template");
 
 // ── Args ──────────────────────────────────────────────────────────────────────
 

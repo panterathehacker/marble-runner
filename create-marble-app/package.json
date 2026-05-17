@@ -6,16 +6,19 @@
   "bin": {
     "create-marble-app": "./index.js"
   },
+  "scripts": {
+    "prepublishOnly": "rm -rf template && cp -r ../template ./template"
+  },
   "files": [
     "index.js",
-    "../template"
+    "template"
   ],
   "keywords": ["marble", "world-labs", "three.js", "rapier", "claude-code"],
   "author": "David Amir Pantera",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/panterathehacker/marble-runner"
+    "url": "git+https://github.com/panterathehacker/marble-runner.git"
   },
   "engines": {
     "node": ">=18"

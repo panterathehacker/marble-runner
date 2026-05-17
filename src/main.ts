@@ -19,110 +19,137 @@ async function main() {
 
   const registry  = new WorldRegistry(config);
   const loader    = new WorldLoader(engine.scene);
-  const hud       = new HUD();
   const character = new CharacterController(engine.scene, physics, config.physics);
   const camera    = new CameraRig(engine.camera, engine.renderer.domElement, physics, config.camera);
 
-  // ── Pickers ──────────────────────────────────────────────────────────
-  const { character: characterSlug, world: pickedWorld } = await showCharacterPicker(
-    config.defaultCharacter ?? "runner",
-    registry.hasUserWorlds() ? undefined : {
-      defaults: registry.getBundledDefaults(),
-      initialSlug: registry.getRandomDefault(),
-    },
-  );
+  async function startSession() {
+    // ── Pickers ──────────────────────────────────────────────────────────
+    const { character: characterSlug, world: pickedWorld } = await showCharacterPicker(
+      config.defaultCharacter ?? "runner",
+      registry.hasUserWorlds() ? undefined : {
+        defaults: registry.getBundledDefaults(),
+        initialSlug: registry.getRandomDefault(),
+      },
+    );
 
-  const worldSlug = registry.hasUserWorlds()
-    ? (registry.getUserSlugs().length > 1 ? await showWorldPicker(config.worlds) : registry.getStartupSlug())
-    : pickedWorld;
+    const worldSlug = registry.hasUserWorlds()
+      ? (registry.getUserSlugs().length > 1 ? await showWorldPicker(config.worlds) : registry.getStartupSlug())
+      : pickedWorld;
 
-  // ── Load character ───────────────────────────────────────────────────
-  hud.showLoading("Loading character…");
-  const { mesh, anim, meta: charMeta } = await loadCharacter(characterSlug).catch((err: Error) => {
-    // Friendly error when character files are missing
-    document.body.innerHTML = `
-      <div style="color:white;padding:40px;font:15px Georgia,serif;background:#0a0a0f;min-height:100vh;white-space:pre-wrap">
-        <h2 style="letter-spacing:0.1em">Character not found</h2>${err.message}
-      </div>`;
-    throw err;
-  });
-  character.setMesh(mesh, anim);
+    // ── Load character ───────────────────────────────────────────────────
+    const hud = new HUD();
+    hud.showLoading("Loading character…");
+    const { mesh, anim, meta: charMeta } = await loadCharacter(characterSlug).catch((err: Error) => {
+      document.body.innerHTML = `
+        <div style="color:white;padding:40px;font:15px Georgia,serif;background:#0a0a0f;min-height:100vh;white-space:pre-wrap">
+          <h2 style="letter-spacing:0.1em">Character not found</h2>${err.message}
+        </div>`;
+      throw err;
+    });
+    character.setMesh(mesh, anim);
 
-  // ── Load world ───────────────────────────────────────────────────────
-  const noFlip = !!registry.getEntry(worldSlug)?.noFlip;
-  hud.showLoading(`Entering your world, as ${charMeta.name}`);
-  await loader.switchTo(worldSlug, (p) => hud.setLoadingProgress(p), noFlip);
-  const cdnBase = (import.meta as any).env?.VITE_WORLDS_BASE_URL?.replace(/\/$/, "");
-  const colliderUrl = cdnBase
-    ? `${cdnBase}/${worldSlug}/collider.glb`
-    : `./worlds/${worldSlug}/collider.glb`;
-  await physics.setColliderMesh(colliderUrl, noFlip);
+    // ── Load world ───────────────────────────────────────────────────────
+    const noFlip = !!registry.getEntry(worldSlug)?.noFlip;
+    hud.showLoading(`Entering your world, as ${charMeta.name}`);
+    await loader.switchTo(worldSlug, (p) => hud.setLoadingProgress(p), noFlip);
+    const cdnBase = (import.meta as any).env?.VITE_WORLDS_BASE_URL?.replace(/\/$/, "");
+    const colliderUrl = cdnBase
+      ? `${cdnBase}/${worldSlug}/collider.glb`
+      : `./worlds/${worldSlug}/collider.glb`;
+    await physics.setColliderMesh(colliderUrl, noFlip);
 
-  const spawn = registry.getSpawn(worldSlug);
-  character.spawn(spawn);
-  hud.setWorldName(loader.currentSlug ? (await fetch(`./worlds/${loader.currentSlug}/meta.json`).then(r => r.ok ? r.json() : null).catch(() => null))?.name ?? worldSlug : worldSlug);
-  hud.hideLoading();
+    const spawn = registry.getSpawn(worldSlug);
+    character.spawn(spawn);
+    hud.setWorldName(loader.currentSlug ? (await fetch(`./worlds/${loader.currentSlug}/meta.json`).then(r => r.ok ? r.json() : null).catch(() => null))?.name ?? worldSlug : worldSlug);
+    hud.hideLoading();
 
-  // ── Debug GUI (Tab to toggle) ─────────────────────────────────────────
-  const debugGui = createDebugPanel(character, anim, charMeta.scale ?? 1);
+    // ── Debug GUI (Tab to toggle) ─────────────────────────────────────────
+    const debugGui = createDebugPanel(character, anim, charMeta.scale ?? 1);
 
-  const tabHint = document.createElement("div");
-  Object.assign(tabHint.style, {
-    position: "fixed", bottom: "18px", right: "20px",
-    color: "rgba(255,255,255,0.22)", font: "11px Georgia,serif",
-    letterSpacing: "0.1em", pointerEvents: "none", zIndex: "500",
-  });
-  tabHint.textContent = "Tab — close panel";
-  document.body.appendChild(tabHint);
+    const tabHint = document.createElement("div");
+    Object.assign(tabHint.style, {
+      position: "fixed", bottom: "18px", right: "20px",
+      color: "rgba(255,255,255,0.22)", font: "11px Georgia,serif",
+      letterSpacing: "0.1em", pointerEvents: "none", zIndex: "500",
+    });
+    tabHint.textContent = "Tab — close panel";
+    document.body.appendChild(tabHint);
 
-  let debugVisible = true;
-  document.addEventListener("keydown", (e) => {
-    if (e.code === "Tab") {
-      e.preventDefault();
-      debugVisible = !debugVisible;
-      debugGui.show(debugVisible);
-      tabHint.textContent = debugVisible ? "Tab — close panel" : "Tab — customize character";
-    }
-  });
+    let debugVisible = true;
 
-  // ── Debug: G = collider wireframe ────────────────────────────────────
-  let wireframeGroup: THREE.Group | null = null;
+    // ── Session-scoped key handlers (removed on home) ────────────────────
+    let wireframeGroup: THREE.Group | null = null;
+    let animId = 0;
 
-  document.addEventListener("keydown", (e) => {
-    if (e.code === "KeyG") {
-      if (!wireframeGroup) {
-        wireframeGroup = new THREE.Group();
-        for (const { vertices, indices } of physics.debugMeshData) {
-          const geo = new THREE.BufferGeometry();
-          geo.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
-          geo.setIndex(new THREE.BufferAttribute(indices, 1));
-          wireframeGroup.add(new THREE.LineSegments(
-            new THREE.WireframeGeometry(geo),
-            new THREE.LineBasicMaterial({ color: 0x00ff88, opacity: 0.55, transparent: true }),
-          ));
-        }
-        engine.scene.add(wireframeGroup);
-      } else {
-        wireframeGroup.visible = !wireframeGroup.visible;
+    function stopSession() {
+      cancelAnimationFrame(animId);
+      document.removeEventListener("keydown", tabHandler);
+      document.removeEventListener("keydown", gHandler);
+      hud.dispose();
+      debugGui.destroy();
+      tabHint.remove();
+      if (wireframeGroup) {
+        engine.scene.remove(wireframeGroup);
+        wireframeGroup = null;
       }
     }
-  });
 
-  // ── Game loop ────────────────────────────────────────────────────────
-  let last = 0;
-  function animate(time: number) {
-    requestAnimationFrame(animate);
-    const dt = Math.min((time - last) / 1000, 0.05);
-    last = time;
+    const tabHandler = (e: KeyboardEvent) => {
+      if (e.code === "Tab") {
+        e.preventDefault();
+        debugVisible = !debugVisible;
+        debugGui.show(debugVisible);
+        tabHint.textContent = debugVisible ? "Tab — close panel" : "Tab — customize character";
+      }
+    };
 
-    character.update(dt, camera.yaw);
-    camera.update(character.position);
-    physics.step(dt);
-    engine.render();
+    const gHandler = (e: KeyboardEvent) => {
+      if (e.code === "KeyG") {
+        if (!wireframeGroup) {
+          wireframeGroup = new THREE.Group();
+          for (const { vertices, indices } of physics.debugMeshData) {
+            const geo = new THREE.BufferGeometry();
+            geo.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
+            geo.setIndex(new THREE.BufferAttribute(indices, 1));
+            wireframeGroup.add(new THREE.LineSegments(
+              new THREE.WireframeGeometry(geo),
+              new THREE.LineBasicMaterial({ color: 0x00ff88, opacity: 0.55, transparent: true }),
+            ));
+          }
+          engine.scene.add(wireframeGroup);
+        } else {
+          wireframeGroup.visible = !wireframeGroup.visible;
+        }
+      }
+    };
+
+    document.addEventListener("keydown", tabHandler);
+    document.addEventListener("keydown", gHandler);
+
+    // ── Home button ───────────────────────────────────────────────────────
+    hud.onHome(() => {
+      stopSession();
+      startSession();
+    });
+
+    // ── Game loop ─────────────────────────────────────────────────────────
+    let last = 0;
+    function animate(time: number) {
+      animId = requestAnimationFrame(animate);
+      const dt = Math.min((time - last) / 1000, 0.05);
+      last = time;
+
+      character.update(dt, camera.yaw);
+      camera.update(character.position);
+      physics.step(dt);
+      engine.render();
+    }
+
+    animate(0);
+    console.log("[MarbleRunner] Ready");
   }
 
-  animate(0);
-  console.log("[MarbleRunner] Ready");
+  startSession();
 }
 
 main().catch((err: Error) => {
