@@ -19,13 +19,13 @@ export function createDebugPanel(
   mov.add(character.params, "runSpeed",   1,   20, 0.1).name("Sprint speed");
   mov.add(character.params, "jumpSpeed",  1,   20, 0.5).name("Jump height");
   mov.add(character.params, "gravity",  -30,   0, 0.1).name("Gravity");
+  mov.add(character.params, "turnSpeed",  1,   30, 0.5).name("Turn speed");
   mov.open();
 
   // ── Character ───────────────────────────────────────────────────────────
   const chr = gui.addFolder("Character");
-  chr.add(character.params, "meshScale",     0.3, 2.0, 0.01).name("Scale");
+  chr.add(character.params, "meshScale",     0.3, 2.0, 0.01).name("Height");
   chr.add(character.params, "meshYawOffset", -180, 180, 1).name("Mesh yaw (°)");
-  chr.add(character.params, "turnSpeed",     1,   30,  0.5).name("Turn speed");
   chr.open();
 
   // ── Animation ───────────────────────────────────────────────────────────

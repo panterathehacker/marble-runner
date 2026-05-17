@@ -90,16 +90,68 @@ export async function showCharacterPicker(
       <div style="font:13px Georgia,serif;letter-spacing:0.28em;opacity:0.4;text-transform:uppercase">Choose your character</div>
       <div id="mr-picker-grid" style="display:flex;gap:28px;flex-wrap:wrap;justify-content:center;max-width:1200px;padding:0 32px"></div>
       ${worldOptions ? `<div id="mr-world-row" style="display:flex;flex-direction:column;align-items:center;gap:10px"></div>` : ""}
-      <button id="mr-picker-start" style="
-        padding:15px 60px;border:1px solid rgba(255,255,255,0.25);background:transparent;
-        color:rgba(255,255,255,0.85);font:15px Georgia,serif;letter-spacing:0.18em;
-        border-radius:2px;cursor:pointer;transition:border-color 0.2s,color 0.2s;
-      ">Start</button>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+        <button id="mr-picker-start" style="
+          padding:15px 60px;border:1px solid rgba(255,255,255,0.25);background:transparent;
+          color:rgba(255,255,255,0.85);font:15px Georgia,serif;letter-spacing:0.18em;
+          border-radius:2px;cursor:pointer;transition:border-color 0.2s,color 0.2s;
+        ">Start</button>
+        ${worldOptions ? `<button id="mr-use-own-world" style="
+          background:none;border:none;color:rgba(255,255,255,0.3);font:12px Georgia,serif;
+          letter-spacing:0.12em;cursor:pointer;text-decoration:underline;
+          text-underline-offset:3px;padding:4px 8px;
+        ">Use my own world</button>` : ""}
+      </div>
     `;
     document.body.appendChild(screen);
 
+    // ── "Use my own world" instructions overlay ───────────────────────────────
+    const instructionsPanel = document.createElement("div");
+    Object.assign(instructionsPanel.style, {
+      position: "absolute", inset: "0", background: "#0a0a0f",
+      display: "none", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      gap: "32px", padding: "48px", color: "white", zIndex: "1",
+    });
+    instructionsPanel.innerHTML = `
+      <div style="font:13px Georgia,serif;letter-spacing:0.28em;opacity:0.4;text-transform:uppercase">Use your own world</div>
+      <div style="font:16px Georgia,serif;opacity:0.55;line-height:1.8;text-align:center;max-width:520px">
+        Have your <code style="background:rgba(255,255,255,0.08);padding:1px 6px;border-radius:2px;font-size:14px">.spz</code> splat file ready, then just tell Claude:
+      </div>
+      <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:28px 36px;max-width:620px;width:100%;position:relative">
+        <div style="font:11px Georgia,serif;letter-spacing:0.18em;opacity:0.3;text-transform:uppercase;margin-bottom:16px">Prompt to copy</div>
+        <div style="font:15px Georgia,serif;line-height:1.9;color:rgba(255,255,255,0.8)">
+          "Add my world to Marble Runner. My splat file is at
+          <span style="color:rgba(160,220,255,0.85)">[path/to/file.spz]</span>
+          and I want to call it
+          <span style="color:rgba(160,220,255,0.85)">[My World Name]</span>.
+          Set up the world folder and generate a flat collider so I can walk around."
+        </div>
+      </div>
+      <div style="font:13px Georgia,serif;opacity:0.35;line-height:2;text-align:center;max-width:500px">
+        Claude will create the <code style="font-size:12px">public/worlds/</code> folder, move your file,<br>
+        write <code style="font-size:12px">meta.json</code>, and scaffold a collider — then restart the server.
+      </div>
+      <button id="mr-back-btn" style="
+        padding:12px 48px;border:1px solid rgba(255,255,255,0.2);background:transparent;
+        color:rgba(255,255,255,0.6);font:13px Georgia,serif;letter-spacing:0.16em;
+        border-radius:2px;cursor:pointer;
+      ">← Back</button>
+    `;
+    screen.appendChild(instructionsPanel);
+
     const grid     = document.getElementById("mr-picker-grid")!;
     const startBtn = document.getElementById("mr-picker-start")! as HTMLButtonElement;
+
+    const ownWorldBtn = document.getElementById("mr-use-own-world") as HTMLButtonElement | null;
+    const backBtn     = instructionsPanel.querySelector("#mr-back-btn") as HTMLButtonElement;
+
+    ownWorldBtn?.addEventListener("click", () => {
+      instructionsPanel.style.display = "flex";
+    });
+    backBtn.addEventListener("click", () => {
+      instructionsPanel.style.display = "none";
+    });
 
     let selectedChar = (rememberedChar && realEntries.some((e) => e.slug === rememberedChar))
       ? rememberedChar

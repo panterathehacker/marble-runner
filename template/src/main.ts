@@ -10,6 +10,7 @@ import { WorldRegistry } from "./world/WorldRegistry.ts";
 import { HUD } from "./ui/HUD.ts";
 import { showCharacterPicker } from "./ui/CharacterPicker.ts";
 import { showWorldPicker } from "./ui/WorldPicker.ts";
+import { createDebugPanel } from "./ui/DebugPanel.ts";
 
 async function main() {
   const engine   = new Engine(config.rendering);
@@ -51,30 +52,43 @@ async function main() {
   const noFlip = !!registry.getEntry(worldSlug)?.noFlip;
   hud.showLoading(`Entering your world, as ${charMeta.name}`);
   await loader.switchTo(worldSlug, (p) => hud.setLoadingProgress(p), noFlip);
-  await physics.setColliderMesh(`./worlds/${worldSlug}/collider.glb`, noFlip);
+  const cdnBase = (import.meta as any).env?.VITE_WORLDS_BASE_URL?.replace(/\/$/, "");
+  const colliderUrl = cdnBase
+    ? `${cdnBase}/${worldSlug}/collider.glb`
+    : `./worlds/${worldSlug}/collider.glb`;
+  await physics.setColliderMesh(colliderUrl, noFlip);
 
   const spawn = registry.getSpawn(worldSlug);
   character.spawn(spawn);
   hud.setWorldName(loader.currentSlug ? (await fetch(`./worlds/${loader.currentSlug}/meta.json`).then(r => r.ok ? r.json() : null).catch(() => null))?.name ?? worldSlug : worldSlug);
   hud.hideLoading();
 
-  // ── Debug: Tab = coordinates, G = collider wireframe ─────────────────
-  let coordsEl: HTMLElement | null = null;
-  let wireframeGroup: THREE.Group | null = null;
+  // ── Debug GUI (Tab to toggle) ─────────────────────────────────────────
+  const debugGui = createDebugPanel(character, anim, charMeta.scale ?? 1);
 
+  const tabHint = document.createElement("div");
+  Object.assign(tabHint.style, {
+    position: "fixed", bottom: "18px", right: "20px",
+    color: "rgba(255,255,255,0.22)", font: "11px Georgia,serif",
+    letterSpacing: "0.1em", pointerEvents: "none", zIndex: "500",
+  });
+  tabHint.textContent = "Tab — close panel";
+  document.body.appendChild(tabHint);
+
+  let debugVisible = true;
   document.addEventListener("keydown", (e) => {
     if (e.code === "Tab") {
       e.preventDefault();
-      if (coordsEl) { coordsEl.remove(); coordsEl = null; return; }
-      coordsEl = document.createElement("div");
-      Object.assign(coordsEl.style, {
-        position: "fixed", top: "44px", left: "20px",
-        color: "rgba(255,255,80,0.9)", font: "13px monospace",
-        pointerEvents: "none", zIndex: "500",
-        textShadow: "0 0 6px rgba(0,0,0,1)",
-      });
-      document.body.appendChild(coordsEl);
+      debugVisible = !debugVisible;
+      debugGui.show(debugVisible);
+      tabHint.textContent = debugVisible ? "Tab — close panel" : "Tab — customize character";
     }
+  });
+
+  // ── Debug: G = collider wireframe ────────────────────────────────────
+  let wireframeGroup: THREE.Group | null = null;
+
+  document.addEventListener("keydown", (e) => {
     if (e.code === "KeyG") {
       if (!wireframeGroup) {
         wireframeGroup = new THREE.Group();
@@ -105,11 +119,6 @@ async function main() {
     camera.update(character.position);
     physics.step(dt);
     engine.render();
-
-    if (coordsEl) {
-      const p = character.position;
-      coordsEl.textContent = `x: ${p.x.toFixed(2)}  y: ${p.y.toFixed(2)}  z: ${p.z.toFixed(2)}`;
-    }
   }
 
   animate(0);

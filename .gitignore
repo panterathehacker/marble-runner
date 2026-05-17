@@ -2,11 +2,8 @@
 node_modules/
 dist/
 
-# World assets — committed only for _default bundled demo world
-public/worlds/*/splat.spz
-public/worlds/*/collider.glb
-!public/worlds/_default/splat.spz
-!public/worlds/_default/collider.glb
+# User-added worlds (not bundled) — keep large files out of git for custom setups
+# To exclude a specific world: public/worlds/my-world/splat.spz
 
 # Character GLBs — committed; thumbnails generated locally
 # (uncomment below to exclude large character files from git)

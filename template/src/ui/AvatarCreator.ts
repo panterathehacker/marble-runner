@@ -128,7 +128,7 @@ export async function renderAvatarHeadshot(glbBuffer: ArrayBuffer): Promise<stri
 
     const scene  = new THREE.Scene();
     scene.background = new THREE.Color(0x888888);
-    const camera = new THREE.PerspectiveCamera(38, W / H, 0.01, 10);
+    const camera = new THREE.PerspectiveCamera(28, W / H, 0.01, 10);
 
     scene.add(new THREE.AmbientLight(0xffffff, 1.6));
     const key = new THREE.DirectionalLight(0xffffff, 2.4);
@@ -159,11 +159,11 @@ export async function renderAvatarHeadshot(glbBuffer: ArrayBuffer): Promise<stri
       if (idleClip) {
         const mixer = new THREE.AnimationMixer(mesh);
         mixer.clipAction(idleClip).play();
-        mixer.update(0.8);
+        mixer.update(0.001); // frame 1 = neutral stand, no forward lean
       }
     } catch { /* T-pose fallback if anim load fails */ }
 
-    // Find head bone world position; default for 1.87 m avatar at 0.75 scale
+    // Find head bone world Y; default for 1.87 m avatar at 0.75 scale
     let headY = 1.60 * 0.75;
     mesh.traverse((obj: any) => {
       if (obj.name === "Head") {
@@ -173,10 +173,10 @@ export async function renderAvatarHeadshot(glbBuffer: ArrayBuffer): Promise<stri
       }
     });
 
-    // Portrait framing: camera well above crown, looking down to mid-chest.
-    // Camera 20cm above head bone gives ~8cm of headroom above the crown.
-    camera.position.set(0, headY + 0.20, 0.90);
-    camera.lookAt(0, headY - 0.10, 0);
+    // Camera below head bone, angled up to meet the avatar's natural chin-down pose.
+    // Narrow FOV (28°) gives a telephoto portrait crop — face + upper chest only.
+    camera.position.set(0, headY - 0.18, 0.58);
+    camera.lookAt(0, headY + 0.10, 0);
     camera.updateProjectionMatrix();
 
     renderer.render(scene, camera);

@@ -21,7 +21,10 @@ export class WorldLoader {
   async preload(slug: string, onProgress?: (p: number) => void, noFlip = false): Promise<LoadedWorld> {
     if (this.cache.has(slug)) return this.cache.get(slug)!;
 
-    const base = `./worlds/${slug}`;
+    // VITE_WORLDS_BASE_URL lets a hosted deployment (e.g. Vercel) serve large
+    // splat files from an external CDN while local dev uses relative paths.
+    const cdnBase = (import.meta as any).env?.VITE_WORLDS_BASE_URL?.replace(/\/$/, "");
+    const base = cdnBase ? `${cdnBase}/${slug}` : `./worlds/${slug}`;
 
     const metaRes = await fetch(`${base}/meta.json`).catch(() => null);
     const meta: WorldMeta = metaRes?.ok
