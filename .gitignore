@@ -1,0 +1,16 @@
+.env
+node_modules/
+dist/
+
+# World assets — committed only for _default bundled demo world
+public/worlds/*/splat.spz
+public/worlds/*/collider.glb
+!public/worlds/_default/splat.spz
+!public/worlds/_default/collider.glb
+
+# Character GLBs — committed; thumbnails generated locally
+# (uncomment below to exclude large character files from git)
+# public/characters/*/character.glb
+
+.DS_Store
+*.local

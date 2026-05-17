@@ -1,0 +1,8 @@
+{
+  "name": "Medieval Market Town",
+  "slug": "_default",
+  "caption": "Demo world bundled with Marble Runner. Temporarily sourced from Lightkeeper/Relic Run.",
+  "groundPlaneOffset": 0,
+  "metricScaleFactor": 1,
+  "note": "Replace this with your own Marble world via `npm run world:add <url>`."
+}

@@ -1,0 +1,12 @@
+.env
+node_modules/
+dist/
+
+# World assets — commit only your _default bundled world
+public/worlds/*/splat.spz
+public/worlds/*/collider.glb
+!public/worlds/_default/splat.spz
+!public/worlds/_default/collider.glb
+
+.DS_Store
+*.local

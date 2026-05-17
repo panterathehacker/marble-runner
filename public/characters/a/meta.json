@@ -1,0 +1,11 @@
+{
+  "name": "Charlotte",
+  "slug": "a",
+  "scale": 0.7,
+  "animations": {
+    "idle": "idle",
+    "walk": "walk",
+    "run": "run",
+    "jump": "jump"
+  }
+}

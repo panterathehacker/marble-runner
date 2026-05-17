@@ -1,0 +1,23 @@
+{
+  "name": "create-marble-app",
+  "version": "0.1.0",
+  "description": "Walk around any Marble world in 60 seconds. Built for Claude Code.",
+  "type": "module",
+  "bin": {
+    "create-marble-app": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "../template"
+  ],
+  "keywords": ["marble", "world-labs", "three.js", "rapier", "claude-code"],
+  "author": "David Amir Pantera",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/panterathehacker/marble-runner"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

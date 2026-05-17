@@ -1,0 +1,11 @@
+{
+  "name": "Freddy",
+  "slug": "c",
+  "scale": 0.60,
+  "animations": {
+    "idle": "idle",
+    "walk": "walk",
+    "run": "run",
+    "jump": "jump"
+  }
+}
