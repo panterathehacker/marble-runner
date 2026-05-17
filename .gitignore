@@ -14,3 +14,4 @@ public/worlds/*/collider.glb
 
 .DS_Store
 *.local
+.vercel
