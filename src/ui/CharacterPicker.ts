@@ -106,7 +106,9 @@ export async function showCharacterPicker(
     document.body.appendChild(screen);
 
     // ── "Use my own world" instructions overlay ───────────────────────────────
-    const promptText = `"Add my world to Marble Runner. My splat file is at <span style="color:rgba(160,220,255,0.85)">[path/to/file.spz]</span> and I want to call it <span style="color:rgba(160,220,255,0.85)">[My World Name]</span>. Set up the world folder and generate a flat collider so I can walk around."`;
+    const ccPromptText = `"Add my world to Marble Runner. My splat file is at <span style="color:rgba(160,220,255,0.85)">[path/to/file.spz]</span> and I want to call it <span style="color:rgba(160,220,255,0.85)">[My World Name]</span>. Set up the world folder and generate a flat collider so I can walk around."`;
+
+    const demoPromptText = `"Clone https://github.com/panterathehacker/marble-runner, install dependencies, and start the dev server. Then add my world: my splat file is at <span style="color:rgba(160,220,255,0.85)">[path/to/file.spz]</span> and I want to call it <span style="color:rgba(160,220,255,0.85)">[My World Name]</span>. Set up the world folder and generate a flat collider so I can walk around."`;
 
     const instructionsPanel = document.createElement("div");
     Object.assign(instructionsPanel.style, {
@@ -124,13 +126,13 @@ export async function showCharacterPicker(
           padding:10px 28px;background:rgba(255,255,255,0.07);border:none;
           color:rgba(255,255,255,0.85);font:12px Georgia,serif;letter-spacing:0.14em;
           cursor:pointer;transition:background 0.15s,color 0.15s;
-        ">Using Claude Code</button>
+        ">Already have Claude Code</button>
         <button id="mr-tab-demo" style="
           padding:10px 28px;background:transparent;border:none;
           border-left:1px solid rgba(255,255,255,0.12);
           color:rgba(255,255,255,0.32);font:12px Georgia,serif;letter-spacing:0.14em;
           cursor:pointer;transition:background 0.15s,color 0.15s;
-        ">Using the demo site</button>
+        ">Just getting started</button>
       </div>
 
       <div id="mr-panel-cc" style="display:flex;flex-direction:column;align-items:center;gap:24px;width:100%;max-width:660px">
@@ -139,7 +141,7 @@ export async function showCharacterPicker(
         </div>
         <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:28px 36px;width:100%">
           <div style="font:11px Georgia,serif;letter-spacing:0.18em;opacity:0.3;text-transform:uppercase;margin-bottom:16px">Prompt to copy</div>
-          <div style="font:15px Georgia,serif;line-height:1.9;color:rgba(255,255,255,0.8)">${promptText}</div>
+          <div style="font:15px Georgia,serif;line-height:1.9;color:rgba(255,255,255,0.8)">${ccPromptText}</div>
         </div>
         <div style="font:13px Georgia,serif;opacity:0.35;line-height:2;text-align:center">
           Claude will create the <code style="font-size:12px">public/worlds/</code> folder, move your file,<br>
@@ -149,27 +151,14 @@ export async function showCharacterPicker(
 
       <div id="mr-panel-demo" style="display:none;flex-direction:column;align-items:center;gap:24px;width:100%;max-width:660px">
         <div style="font:15px Georgia,serif;opacity:0.55;line-height:1.9;text-align:center;max-width:540px">
-          Playing at marble-runner.vercel.app? To walk through your own world,<br>you'll need a local copy of the project.
+          Open Claude Code anywhere on your machine and paste this one prompt —<br>Claude will clone the repo, install everything, and add your world.
         </div>
-        <div style="display:flex;flex-direction:column;gap:12px;width:100%">
-          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:4px;padding:16px 20px;display:flex;gap:14px;align-items:flex-start">
-            <span style="color:rgba(255,255,255,0.2);font:13px Georgia,serif;min-width:18px">1.</span>
-            <div style="font:13px Georgia,serif;line-height:1.8;color:rgba(255,255,255,0.6)">
-              Clone the GitHub repo — <a href="https://github.com/panterathehacker/marble-runner" target="_blank" style="color:rgba(160,220,255,0.75);text-decoration:none">github.com/panterathehacker/marble-runner</a>
-            </div>
-          </div>
-          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:4px;padding:16px 20px;display:flex;gap:14px;align-items:flex-start">
-            <span style="color:rgba(255,255,255,0.2);font:13px Georgia,serif;min-width:18px">2.</span>
-            <div style="font:13px Georgia,serif;line-height:1.8;color:rgba(255,255,255,0.6)">
-              Open the folder in Claude Code and run <code style="background:rgba(255,255,255,0.07);padding:1px 5px;border-radius:2px;font-size:12px">npm run dev</code>
-            </div>
-          </div>
-          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:4px;padding:16px 20px;display:flex;gap:14px;align-items:flex-start">
-            <span style="color:rgba(255,255,255,0.2);font:13px Georgia,serif;min-width:18px">3.</span>
-            <div style="font:13px Georgia,serif;line-height:1.8;color:rgba(255,255,255,0.6)">
-              Tell Claude: ${promptText}
-            </div>
-          </div>
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:28px 36px;width:100%">
+          <div style="font:11px Georgia,serif;letter-spacing:0.18em;opacity:0.3;text-transform:uppercase;margin-bottom:16px">Prompt to copy</div>
+          <div style="font:15px Georgia,serif;line-height:1.9;color:rgba(255,255,255,0.8)">${demoPromptText}</div>
+        </div>
+        <div style="font:13px Georgia,serif;opacity:0.35;line-height:1.9;text-align:center">
+          Don't have Claude Code? Get it at <a href="https://claude.ai/code" target="_blank" style="color:rgba(160,220,255,0.6);text-decoration:none">claude.ai/code</a> — it's free.
         </div>
       </div>
 
