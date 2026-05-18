@@ -1,6 +1,8 @@
 # Marble Runner
 
-**Walk around any Gaussian splat world as a third-person character. Made for [World Labs Marble](https://marble.worldlabs.ai).**
+**Walk around any Gaussian splat world as yourself in third-person. 
+
+Made for [World Labs Marble](https://marble.worldlabs.ai).**
 
 ---
 
@@ -8,29 +10,22 @@
 
 Visit **[marble-runner.vercel.app](https://marble-runner.vercel.app)**
 
-- Pick one of five Marble worlds — Temple, Cathedral, Market, War Room, Throne Room
-- Choose a character or **make your own** (Avaturn avatar creator, takes ~60 seconds)
-- Walk, run, jump with WASD · Shift · Space
+- Pick one of five default worlds.
+- Choose a character or **make your own** (Avaturn avatar creator, takes ~60 seconds).
+- Walk, run, jump with WASD · Shift · Space.
 
 No sign-up. No API key. No install.
 
 ---
 
-## Use your own Marble world
+## Or, use your own Marble world
 
-You'll need [Claude Code](https://claude.ai/code). If you don't have it:
-
-```bash
-curl -fsSL https://claude.ai/install.sh | bash
-```
-
-Then open Claude Code and paste this one prompt — Claude handles the clone, install, dev server, and world setup automatically:
+Open Claude Code and paste this one prompt — Claude handles the clone, install, dev server, and world setup automatically:
 
 > "Clone https://github.com/panterathehacker/marble-runner, install dependencies, and start the dev server. Then add my world: my splat file is at `[/path/to/your-scene.spz]` and I want to call it `[World Name]`. Set up the world folder and generate a flat collider so I can walk around."
 
 That's it. In about two minutes you'll be walking around your world.
 
-> **Don't have a `.spz` file yet?** Export one from [Luma AI](https://lumalabs.ai) or [Polycam](https://poly.cam).
 
 ### If you already cloned the repo
 
@@ -39,6 +34,8 @@ Have your `.spz` file ready and tell Claude:
 > "Add my world to Marble Runner. My splat file is at `[/path/to/your-scene.spz]` and I want to call it `[World Name]`. Set up the world folder and generate a flat collider so I can walk around."
 
 Claude will create `public/worlds/your-world/`, copy the splat, scaffold a physics collider, write `meta.json`, and restart the dev server.
+
+Get a .spz world file by generating a world in Marble.
 
 ---
 
