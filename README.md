@@ -2,7 +2,7 @@
 
 **Walk around any Gaussian splat world as yourself in third-person.**
 
-Made for [World Labs Marble](https://marble.worldlabs.ai).
+Made for [World Labs' Marble](https://marble.worldlabs.ai).
 
 ---
 
